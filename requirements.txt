@@ -1,0 +1,8 @@
+crewai
+langchain_ollama
+streamlit
+pydantic
+langchain
+crewai-tools
+litellm
+duckduckgo-search
