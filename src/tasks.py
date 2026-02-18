@@ -7,9 +7,9 @@ class JobTasks:
             description=(
                 f"Search for job postings based on the following criteria: {criteria}. "
                 "Use the search tool to find actively hiring roles. "
-                "Return a structured list of the top 3 jobs found."
+                "Return a structured list of at least 50 jobs found."
             ),
-            expected_output="A list of 3 JobPosting objects containing title, company, location, salary, link, and description.",
+            expected_output="A list of 50+ JobPosting objects containing title, company, location, salary, link, and description.",
             agent=agent,
             output_pydantic=JobSearchSchema 
         )
