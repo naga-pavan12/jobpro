@@ -1,4 +1,5 @@
 import streamlit as st
+import textwrap
 import sys
 import os
 import io
@@ -78,6 +79,12 @@ st.markdown("""
         background-color: #21262D;
         color: #FFFFFF;
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    /* Force Dark Background for Visibility */
+    .stApp {
+        background-color: #0E1117;
+        color: #FFFFFF;
     }
 
     /* Glass Cards */
@@ -277,8 +284,15 @@ if start_btn:
                         elif hasattr(search_output, 'raw'):
                              # Fallback: try to parse raw string if it looks like JSON
                             import json
+                            import re
                             try:
-                                jobs_data = json.loads(search_output.raw)
+                                raw_text = search_output.raw
+                                # Strip markdown code blocks if present
+                                match = re.search(r'```json\n?(.*?)\n?```', raw_text, re.DOTALL)
+                                if match:
+                                    raw_text = match.group(1)
+                                
+                                jobs_data = json.loads(raw_text)
                             except:
                                 st.warning("Could not parse job data JSON.")
                                 st.text(search_output.raw)
@@ -298,17 +312,38 @@ if start_btn:
                         cols = st.columns(3)
                         for i, job in enumerate(jobs_list):
                             with cols[i % 3]:
-                                st.markdown(f"""
-                                <div class="glass-card">
-                                    <div class="job-title">{job.get('title', 'N/A')}</div>
-                                    <div class="company-name">🏢 {job.get('company', 'N/A')}</div>
-                                    <div class="tag-container">
-                                        <span class="glass-tag">📍 {job.get('location', 'N/A')}</span>
-                                        <span class="glass-tag">💰 {job.get('salary', 'N/A')}</span>
-                                    </div>
-                                    <a href="{job.get('link', '#')}" target="_blank" class="apply-btn-glow">View Position</a>
-                                </div>
-                                """, unsafe_allow_html=True)
+                                title = job.get('title', 'N/A')
+                                company = job.get('company', 'N/A')
+                                location = job.get('location', 'N/A')
+                                salary = job.get('salary', 'N/A')
+                                link = job.get('link', '#')
+                                
+                                # Using standard string formatting to avoid indentation issues
+                                # Using standard string formatting to avoid indentation issues
+                                card_html = textwrap.dedent(f'''
+                                    <div class="glass-card">
+                                        <div class="job-title">{title}</div>
+                                        <div class="company-name">🏢 {company}</div>
+                                        <div class="tag-container">
+                                            <span class="glass-tag">📍 {location}</span>
+                                            <span class="glass-tag">💰 {salary}</span>
+                                        </div>
+                                ''')
+                                
+                                # Check for valid link
+                                if link and link.lower() not in ['n/a', '#', 'none', '']:
+                                    card_html += textwrap.dedent(f'''
+                                        <a href="{link}" target="_blank" class="apply-btn-glow">View Position</a>
+                                    ''')
+                                else:
+                                    card_html += textwrap.dedent(f'''
+                                        <div class="apply-btn-glow" style="opacity: 0.5; cursor: not-allowed; background: rgba(255,255,255,0.05);">Link Unavailable</div>
+                                    ''')
+                                
+                                card_html += "</div>"
+                                
+                                # Remove newlines and extra spaces to ensure Clean Markdown rendering
+                                st.markdown(card_html, unsafe_allow_html=True)
                                 
                     else:
                         st.warning("No structured job data found in agent output.")
