@@ -13,7 +13,7 @@ class JobSearchTool(BaseTool):
             # Search for jobs specifically
             search_query = f"{query} jobs hiring now"
             # Getting more results to filter
-            ddg_results = list(ddgs.text(search_query, max_results=60))
+            ddg_results = list(ddgs.text(search_query, max_results=25))
             
             for r in ddg_results:
                 results.append({
