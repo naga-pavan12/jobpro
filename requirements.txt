@@ -4,5 +4,5 @@ streamlit
 pydantic
 langchain
 crewai-tools
-litellm
+litellm[proxy]
 duckduckgo-search
