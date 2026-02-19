@@ -1,13 +1,13 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 
 class JobPosting(BaseModel):
-    title: str = Field(..., description="The job title")
-    company: str = Field(..., description="The hiring company name")
-    location: str = Field(..., description="Job location (e.g. Remote, City)")
-    salary: str = Field(..., description="Salary range if available, else 'Competitive'")
-    link: str = Field(..., description="Link to the job posting")
-    description: str = Field(..., description="Brief summary of requirements")
+    title: Optional[str] = Field(default="N/A", description="The job title")
+    company: Optional[str] = Field(default="N/A", description="The hiring company name")
+    location: Optional[str] = Field(default="N/A", description="Job location (e.g. Remote, City)")
+    salary: Optional[str] = Field(default="Competitive", description="Salary range if available, else 'Competitive'")
+    link: Optional[str] = Field(default="#", description="Link to the job posting")
+    description: Optional[str] = Field(default="No description available", description="Brief summary of requirements")
 
 class JobSearchSchema(BaseModel):
     jobs: List[JobPosting] = Field(..., description="List of found job postings")

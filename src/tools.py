@@ -2,10 +2,15 @@ import json
 import requests
 from bs4 import BeautifulSoup
 from crewai.tools import BaseTool
+from pydantic import BaseModel, Field
+
+class JobSearchInput(BaseModel):
+    query: str = Field(..., description="The search query string, e.g. 'Python Developer Remote'")
 
 class JobSearchTool(BaseTool):
     name: str = "JobSearchTool"
     description: str = "MANDATORY: Use this tool to search for real job listings. Input: a simple string query (e.g. 'Python Remote'). Output: JSON list of jobs."
+    args_schema: type[BaseModel] = JobSearchInput
 
     def _run(self, query: str) -> str:
         url = "https://html.duckduckgo.com/html/"
