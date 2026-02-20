@@ -7,13 +7,12 @@ class JobTasks:
         return Task(
             description=(
                 f"Search for job postings based on the following criteria: {criteria}. "
-                "You MUST use the 'JobSearchTool' to retrieve real data. "
-                "Do NOT generate fake jobs or use your training data. "
-                "Return the exact list of jobs provided by the tool. "
-                "IMPORTANT: You MUST include the 'link' field for every job. "
-                "Use the exact URL provided by the tool. Do not modify or remove links."
+                "You MUST use the 'JobSearchTool' to find these jobs. "
+                "The tool will handle the search and data retrieval. "
+                "Once the tool has been used, simply return the list of jobs found. "
+                "Do not make up any jobs. Do not use your training data."
             ),
-            expected_output="A list of job postings in JSON format. Do not alter the tool output.",
+            expected_output="A list of real job postings from the tool.",
             agent=agent,
             tools=[JobSearchTool()],
         )

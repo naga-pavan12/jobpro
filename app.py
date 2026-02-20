@@ -275,7 +275,17 @@ if start_btn:
                 # Try to get the output of the first task (Search Task)
                 jobs_data = []
                 try:
-                    if hasattr(final_result, 'tasks_output') and len(final_result.tasks_output) > 0:
+                    # SIDE CHANNEL: Check for direct tool output file first
+                    import os
+                    if os.path.exists("jobs_output.json"):
+                         with open("jobs_output.json", "r") as f:
+                              try:
+                                  jobs_data = json.load(f)
+                              except:
+                                  pass
+
+                    # Fallback to Agent Output if file not found or empty
+                    if not jobs_data and hasattr(final_result, 'tasks_output') and len(final_result.tasks_output) > 0:
                         search_output = final_result.tasks_output[0]
                         if hasattr(search_output, 'json_dict') and search_output.json_dict:
                             jobs_data = search_output.json_dict.get('jobs', [])
@@ -302,6 +312,22 @@ if start_btn:
                         
                         # Handle Pydantic objects or dicts
                         jobs_list = []
+                        
+                        # Normalize dict to list if needed
+                        if isinstance(jobs_data, dict):
+                            if 'results' in jobs_data:
+                                jobs_data = jobs_data['results']
+                            elif 'jobs' in jobs_data:
+                                jobs_data = jobs_data['jobs']
+                            elif 'data' in jobs_data:
+                                jobs_data = jobs_data['data']
+                            else:
+                                # Try to find any list value
+                                for v in jobs_data.values():
+                                    if isinstance(v, list):
+                                        jobs_data = v
+                                        break
+                        
                         if len(jobs_data) > 0:
                              if hasattr(jobs_data[0], 'model_dump'):
                                  jobs_list = [j.model_dump() for j in jobs_data]
@@ -348,7 +374,12 @@ if start_btn:
                     else:
                         st.warning("No structured job data found in agent output.")
                 except Exception as e:
+                    import traceback
                     st.error(f"Error displaying jobs: {e}")
+                    st.text(traceback.format_exc())
+                    if 'jobs_data' in locals():
+                        st.write("Jobs Data Type:", type(jobs_data))
+                        st.write("Jobs Data Content:", str(jobs_data)[:500])
                     st.write(final_result)
 
             # --- Tab 3: Application Kit ---

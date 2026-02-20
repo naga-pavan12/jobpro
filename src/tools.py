@@ -12,7 +12,19 @@ class JobSearchTool(BaseTool):
     description: str = "MANDATORY: Use this tool to search for real job listings. Input: a simple string query (e.g. 'Python Remote'). Output: JSON list of jobs."
     args_schema: type[BaseModel] = JobSearchInput
 
-    def _run(self, query: str) -> str:
+    def _run(self, **kwargs) -> str:
+        # Robustly extract query from various possible keys
+        query = kwargs.get('query') or kwargs.get('q') or kwargs.get('search_query')
+        
+        # Handle case where LLM wraps args in 'properties' (common in local models)
+        if not query and 'properties' in kwargs:
+             props = kwargs['properties']
+             if isinstance(props, dict):
+                 query = props.get('query') or props.get('q')
+
+        if not query:
+            return json.dumps([{"error": f"Missing query argument. Received: {kwargs.keys()}"}])
+
         url = "https://html.duckduckgo.com/html/"
         headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
@@ -73,9 +85,17 @@ class JobSearchTool(BaseTool):
                             "description": snippet
                         })
                         
-                if len(results) >= 20:
+                if len(results) >= 10:
                     break
                     
+             # --- SIDE CHANNEL: Save to file for UI to read directly ---
+            try:
+                 with open("jobs_output.json", "w") as f:
+                     json.dump(results, f, indent=2)
+            except Exception as save_err:
+                 print(f"Error saving jobs_output.json: {save_err}")
+            # ----------------------------------------------------------
+
         except Exception as e:
             return json.dumps([{"error": f"Search failed: {e}"}])
 
